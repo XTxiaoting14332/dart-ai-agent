@@ -719,6 +719,7 @@ void main(List<String> args) {
           "reasoningEffort": "medium",
           "repl": false,
           "debug": false,
+          "blockedFiles": [".env", ".env.dev", ".env.prod", "config.json", "credentials.json", "id_rsa", "id_rsa.pub"]
         };
         configFile.writeAsStringSync(jsonEncode(configContent));
         Logger.info('Created default config.json');
@@ -735,6 +736,14 @@ void main(List<String> args) {
       Config.token = config['token'] ?? Config.token;
       Config.repl = config['repl'] ?? Config.repl;
       Config.debug = config['debug'] ?? Config.debug;
+      
+      if (config['blockedFiles'] is List) {
+        Config.blockedFiles = List<String>.from(config['blockedFiles']);
+      } else if (config['blockedFiles'] == null) {
+        // 提供默认阻止列表，如果你想要严格控制
+        Config.blockedFiles = ['.env', '.env.dev', '.env.prod', 'config.json', 'credentials.json', 'id_rsa', 'id_rsa.pub'];
+      }
+      
       String host = Config.host;
       int port = Config.port;
       if (Config.apiKey.isEmpty) {

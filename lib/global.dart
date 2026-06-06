@@ -34,6 +34,9 @@ class Config {
   // 认证 token
   static String token = '';
 
+  // 敏感文件阻止列表
+  static List<String> blockedFiles = [];
+
   // 应用程序数据目录
   static String get appDataDir {
     final home = Platform.environment['HOME'] ?? Platform.environment['USERPROFILE'];

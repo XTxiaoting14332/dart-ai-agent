@@ -56,8 +56,32 @@ class Skills {
     }
   }
 
+  /// 检查是否为敏感文件
+  bool _isSensitivePath(String filePath) {
+    String name = filePath.split(Platform.pathSeparator).last.toLowerCase();
+    
+    // 检查是否在全局阻止列表中
+    for (String blocked in Config.blockedFiles) {
+      String b = blocked.toLowerCase();
+      if (b.contains('*')) {
+        String pattern = b.replaceAll('*', '.*');
+        if (RegExp('^$pattern\$').hasMatch(name)) return true;
+      } else {
+        if (name == b) return true;
+      }
+    }
+    
+    // 强制检查包含 apikey 的文件
+    if (name.contains('apikey') || name.contains('api_key')) return true;
+
+    return false;
+  }
+
   /// 读取文件内容
   Future<Map> readFile(String path) async {
+    if (_isSensitivePath(path)) {
+      return {'success': false, 'error': '权限拒绝：无法读取敏感文件 $path'};
+    }
     try {
       String content = await File(path).readAsString();
       return {'success': true, 'content': content};
@@ -100,6 +124,7 @@ class Skills {
     if (recursive && depth > maxDepth) return;
     try {
       await for (var entity in dir.list(followLinks: false)) {
+        if (_isSensitivePath(entity.path)) continue; // 隐藏敏感文件
         String type = entity is Directory ? 'directory' : 'file';
         Map<String, dynamic> entry = {
           'name': entity.uri.pathSegments.lastWhere(
@@ -179,6 +204,7 @@ class Skills {
             maxResults,
           );
         } else if (entity is File) {
+          if (_isSensitivePath(entity.path)) continue; // 跳过敏感文件搜索
           String fileName = entity.uri.pathSegments.lastWhere(
             (s) => s.isNotEmpty,
             orElse: () => '',
@@ -208,6 +234,9 @@ class Skills {
 
   /// 写入内容到文件
   Future<Map> writeFile(String path, String content) async {
+    if (_isSensitivePath(path)) {
+      return {'success': false, 'error': '权限拒绝：无法修改敏感文件 $path'};
+    }
     try {
       await File(path).writeAsString(content);
       return {'success': true};
@@ -218,6 +247,9 @@ class Skills {
 
   /// 修改文件内容（支持批量操作）
   Future<Map> modifyFile(String path, List<Map<String, dynamic>> edits) async {
+    if (_isSensitivePath(path)) {
+      return {'success': false, 'error': '权限拒绝：无法修改敏感文件 $path'};
+    }
     try {
       List<String> lines = await File(path).readAsLines();
 
@@ -326,6 +358,9 @@ class Skills {
     String newString, {
     bool replaceAll = false,
   }) async {
+    if (_isSensitivePath(path)) {
+      return {'success': false, 'error': '权限拒绝：无法修改敏感文件 $path'};
+    }
     try {
       String content = await File(path).readAsString();
       int count = content.split(oldString).length - 1;
