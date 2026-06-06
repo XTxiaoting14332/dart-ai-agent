@@ -1,0 +1,27 @@
+# https://dart.dev/tools/private-files
+# Created by `dart pub`
+.dart_tool/
+
+# Dart & Pub
+.packages
+.pub/
+.pub-cache/
+build/
+coverage/
+doc/api/
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+.DS_Store
+
+# Application Specific
+config.json
+sessions/
+.nwagent/
+
+.antigravitycli/
+test_input.dart

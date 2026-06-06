@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>坦克大战</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #222; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    canvas { border: 2px solid #333; background: #000; }
+  </style>
+</head>
+<body>
+<canvas id="gameCanvas" width="600" height="600"></canvas>
+<script>
+  const canvas = document.getElementById('gameCanvas');
+  const ctx = canvas.getContext('2d');
+
+  // 坦克类
+  class Tank {
+    constructor(x, y, color, keys) {
+      this.x = x;
+      this.y = y;
+      this.size = 30;
+      this.speed = 2;
+      this.direction = 'up';
+      this.color = color;
+      this.keys = keys;
+      this.bullets = [];
+      this.cooldown = 0;
+    }
+
+    draw() {
+      ctx.save();
+      ctx.translate(this.x + this.size/2, this.y + this.size/2);
+      ctx.rotate(this.direction === 'up' ? 0 : this.direction === 'right' ? Math.PI/2 : this.direction === 'down' ? Math.PI : -Math.PI/2);
+      // 坦克主体
+      ctx.fillStyle = this.color;
+      ctx.fillRect(-this.size/2, -this.size/2, this.size, this.size);
+      // 炮管
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(-5, -this.size/2 - 8, 10, 16);
+      ctx.restore();
+    }
+
+    move(dir, bricks, tanks) {
+      this.direction = dir;
+      let dx = 0, dy = 0;
+      if (dir === 'up') dy = -this.speed;
+      else if (dir === 'down') dy = this.speed;
+      else if (dir === 'left') dx = -this.speed;
+      else if (dir === 'right') dx = this.speed;
+      const newX = this.x + dx;
+      const newY = this.y + dy;
+      // 边界检测
+      if (newX < 0 || newX + this.size > canvas.width) return;
+      if (newY < 0 || newY + this.size > canvas.height) return;
+      // 砖块碰撞
+      for (let b of bricks) {
+        if (newX < b.x + b.w && newX + this.size > b.x && newY < b.y + b.h && newY + this.size > b.y) {
+          return;
+        }
+      }
+      // 坦克碰撞
+      for (let t of tanks) {
+        if (t === this) continue;
+        if (newX < t.x + t.size && newX + this.size > t.x && newY < t.y + t.size && newY + this.size > t.y) {
+          return;
+        }
+      }
+      this.x = newX;
+      this.y = newY;
+    }
+
+    shoot() {
+      if (this.cooldown > 0) return;
+      this.cooldown = 30;
+      let bx = this.x + this.size/2 - 3;
+      let by = this.y + this.size/2 - 3;
+      let bdx = 0, bdy = 0;
+      if (this.direction === 'up') { bdy = -5; by -= 15; }
+      else if (this.direction === 'down') { bdy = 5; by += 15; }
+      else if (this.direction === 'left') { bdx = -5; bx -= 15; }
+      else if (this.direction === 'right') { bdx = 5; bx += 15; }
+      this.bullets.push({ x: bx, y: by, dx: bdx, dy: bdy, size: 6 });
+    }
+
+    updateBullets(bricks, tanks) {
+      this.cooldown = Math.max(0, this.cooldown - 1);
+      for (let i = this.bullets.length - 1; i >= 0; i--) {
+        const b = this.bullets[i];
+        b.x += b.dx;
+        b.y += b.dy;
+        if (b.x < 0 || b.x > canvas.width || b.y < 0 || b.y > canvas.height) {
+          this.bullets.splice(i, 1);
+          continue;
+        }
+        // 碰撞砖块
+        for (let j = bricks.length - 1; j >= 0; j--) {
+          const br = bricks[j];
+          if (b.x < br.x + br.w && b.x + b.size > br.x && b.y < br.y + br.h && b.y + b.size > br.y) {
+            this.bullets.splice(i, 1);
+            bricks.splice(j, 1);
+            break;
+          }
+        }
+        // 碰撞坦克
+        if (tanks) {
+          for (let t of tanks) {
+            if (t === this) continue;
+            if (b.x < t.x + t.size && b.x + b.size > t.x && b.y < t.y + t.size && b.y + b.size > t.y) {
+              this.bullets.splice(i, 1);
+              // 击中处理
+              alert('击中！');
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    drawBullets() {
+      ctx.fillStyle = '#ff0';
+      this.bullets.forEach(b => ctx.fillRect(b.x, b.y, b.size, b.size));
+    }
+  }
+
+  // 砖块类
+  class Brick {
+    constructor(x, y, w, h) {
+      this.x = x;
+      this.y = y;
+      this.w = w;
+      this.h = h;
+    }
+    draw() {
+      ctx.fillStyle = '#8B4513';
+      ctx.fillRect(this.x, this.y, this.w, this.h);
+      ctx.strokeStyle = '#654321';
+      ctx.strokeRect(this.x, this.y, this.w, this.h);
+    }
+  }
+
+  // 初始化
+  const player = new Tank(50, 100, '#0f0', { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight', shoot: ' ' });
+  const enemy = new Tank(500, 400, '#f00', { up: 'w', down: 's', left: 'a', right: 'd', shoot: 'q' });
+  const bricks = [];
+  // 生成砖块
+  for (let i = 0; i < 10; i++) {
+    bricks.push(new Brick(Math.random() * (canvas.width - 50), Math.random() * (canvas.height - 50), 40, 20));
+  }
+
+  // 按键处理
+  const keys = {};
+  document.addEventListener('keydown', e => keys[e.key] = true);
+  document.addEventListener('keyup', e => keys[e.key] = false);
+
+  // 敌人AI变量
+  let enemyMoveCounter = 0;
+
+  function gameLoop() {
+    // 玩家移动
+    const allTanks = [player, enemy];
+    if (keys['ArrowUp']) player.move('up', bricks, allTanks);
+    else if (keys['ArrowDown']) player.move('down', bricks, allTanks);
+    else if (keys['ArrowLeft']) player.move('left', bricks, allTanks);
+    else if (keys['ArrowRight']) player.move('right', bricks, allTanks);
+    if (keys[' ']) player.shoot();
+
+    // 敌人简单AI
+    enemyMoveCounter++;
+    if (enemyMoveCounter % 30 === 0) { // 每30帧改变方向
+      const dirs = ['up','down','left','right'];
+      enemy.move(dirs[Math.floor(Math.random()*4)], bricks, allTanks);
+    } else {
+      // 保持当前方向移动
+      enemy.move(enemy.direction, bricks, allTanks);
+    }
+    if (Math.random() < 0.02) enemy.shoot();
+
+    // 更新子弹
+    player.updateBullets(bricks, allTanks);
+    enemy.updateBullets(bricks, allTanks);
+
+    // 绘制
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    bricks.forEach(b => b.draw());
+    player.draw();
+    player.drawBullets();
+    enemy.draw();
+    enemy.drawBullets();
+
+    requestAnimationFrame(gameLoop);
+  }
+
+  gameLoop();
+</script>
+</body>
+</html>
