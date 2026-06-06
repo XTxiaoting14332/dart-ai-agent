@@ -20,19 +20,20 @@
 
 ## 📦 快速开始
 
-### 1. 安装与获取
+### 1. 下载与安装
 
-确保你已安装 [Dart SDK](https://dart.dev/get-dart)（>= 3.12.0）。
+NWAgent 提供了开箱即用的预编译独立二进制文件，**无需配置任何开发环境**。
 
-```bash
-git clone https://github.com/XTxiaoting14332/dart-ai-agent.git
-cd dart-ai-agent
-dart pub get
-```
+1. 前往 GitHub 的 [Releases 页面](https://github.com/XTxiaoting14332/dart-ai-agent/releases)。
+2. 根据你的操作系统下载对应的可执行文件（Windows/macOS/Linux）。
+3. 将下载的文件放到任意目录下，并在终端中给予执行权限（Linux/macOS）：
+   ```bash
+   chmod +x nwagent
+   ```
 
 ### 2. 配置文件
 
-初次运行后，程序会在你的用户主目录（`~/.nwagent/` 或 `C:\Users\用户名\.nwagent\`）下自动生成 `config.json` 文件及 `sessions/` 对话数据存放目录。
+初次执行 `./nwagent` 后，程序会在你的用户主目录（`~/.nwagent/` 或 `C:\Users\用户名\.nwagent\`）下自动生成 `config.json` 文件及 `sessions/` 对话数据存放目录。
 
 默认配置如下，请务必填入你的 `apiKey`：
 
@@ -56,18 +57,18 @@ dart pub get
 
 ### 🎮 玩法一：终端极客模式 (REPL)
 
-修改配置 ` "repl": true `，直接在终端里和你的电脑对话：
+确认配置文件中 ` "repl": true `，直接在终端里运行：
 
 ```bash
-dart run bin/nwagent.dart
+./nwagent
 ```
 
 **多会话管理参数：**
-- `dart run bin/nwagent.dart`：默认每次开启一个**全新**的纯净会话。
-- `dart run bin/nwagent.dart -c`：**恢复并继续**最后一次未聊完的会话。
-- `dart run bin/nwagent.dart -l`：列出当前系统里所有的历史会话 UUID 和时间。
-- `dart run bin/nwagent.dart -s <UUID>`：精准跳回某个具体的历史对话节点。
-- `dart run bin/nwagent.dart -h`：查看命令行参数帮助。
+- `./nwagent`：默认每次开启一个**全新**的纯净会话。
+- `./nwagent -c` 或 `--continue`：**恢复并继续**最后一次未聊完的会话。
+- `./nwagent -l` 或 `--list`：列出当前系统里所有的历史会话 UUID 和时间。
+- `./nwagent -s <UUID>` 或 `--session <UUID>`：精准跳回某个具体的历史对话节点。
+- `./nwagent -h` 或 `--help`：查看命令行参数帮助。
 
 **REPL 内置快捷指令：**
 - `↑` / `↓`：浏览你的输入历史
@@ -77,7 +78,7 @@ dart run bin/nwagent.dart
 
 ### 🌐 玩法二：API 后端模式
 
-修改配置 `"repl": false` 并运行程序，即可将其作为 HTTP 服务后台挂起。
+修改配置 `"repl": false` 并运行 `./nwagent`，即可将其作为 HTTP 服务后台挂起。
 
 **请求示例 (CURL)：**
 ```bash
@@ -91,6 +92,26 @@ curl -X POST http://localhost:9080/agent/v1/chat/completions \
 ```
 
 接口返回的是标准化 JSON，包含了 Agent 的执行步骤总结 (`summary`) 和最终回复 (`msg`)。
+
+## 🛠️ 源码编译开发
+
+如果你想基于源码进行二次开发，请按照以下步骤配置开发环境：
+
+1. 确保已安装 [Dart SDK](https://dart.dev/get-dart)（>= 3.12.0）。
+2. 克隆并获取依赖：
+   ```bash
+   git clone https://github.com/XTxiaoting14332/dart-ai-agent.git
+   cd dart-ai-agent
+   dart pub get
+   ```
+3. 本地调试运行：
+   ```bash
+   dart run bin/nwagent.dart
+   ```
+4. 编译为独立二进制文件：
+   ```bash
+   dart compile exe bin/nwagent.dart -o build/nwagent
+   ```
 
 ## 📁 目录架构
 
