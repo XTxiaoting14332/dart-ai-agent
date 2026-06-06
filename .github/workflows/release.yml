@@ -121,30 +121,6 @@ jobs:
             name: nwagent-linux-arm
             path: dist/nwagent-linux-arm
 
-  macos:
-    runs-on: macos-13
-
-    steps:
-        - name: Checkout
-          uses: actions/checkout@v4
-          with:
-            submodules: true
-        - name: Setup Dart
-          uses: dart-lang/setup-dart@v1
-          with:
-            sdk: 3.12.1
-
-        - name: Compile
-          run: |
-            mkdir dist
-            dart pub get
-            dart compile exe bin/nwagent.dart -o dist/nwagent-macos
-
-        - name: Upload Dist Artifact
-          uses: actions/upload-artifact@v4
-          with:
-            name: nwagent-macos
-            path: dist/nwagent-macos
 
   macos_M1:
     runs-on: macos-latest
@@ -180,7 +156,6 @@ jobs:
       - linux_amd64
       - linux_arm64
       - linux_arm
-      - macos
       - macos_M1
 
     steps:
@@ -204,11 +179,7 @@ jobs:
           name: "nwagent-linux-amd64"
           path: dist/
 
-      - name: Download Artifact (MacOS)
-        uses: actions/download-artifact@v4
-        with:
-          name: "nwagent-macos"
-          path: dist/
+
 
       - name: Download Artifact (MacOS M1)
         uses: actions/download-artifact@v4
@@ -242,5 +213,4 @@ jobs:
             dist/nwagent-linux-amd64
             dist/nwagent-linux-arm64
             dist/nwagent-linux-arm
-            dist/nwagent-macos
             dist/nwagent-macos-M1
