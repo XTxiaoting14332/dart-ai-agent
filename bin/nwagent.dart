@@ -649,18 +649,20 @@ Future<void> startRepl({bool createNew = false, String? sessionId}) async {
 }
 
 void main(List<String> args) {
-  bool createNewSession = true;
+  bool forceRepl = false;
+  bool continueSession = false;
   String? sessionId;
   bool listSessions = false;
   bool showHelp = false;
 
   for (int i = 0; i < args.length; i++) {
     if (args[i] == '-c' || args[i] == '--continue') {
-      createNewSession = false;
+      continueSession = true;
+      forceRepl = true;
     } else if (args[i] == '-s' || args[i] == '--session') {
       if (i + 1 < args.length) {
         sessionId = args[i + 1];
-        createNewSession = false;
+        forceRepl = true;
         i++;
       }
     } else if (args[i] == '-l' || args[i] == '--list') {
@@ -751,8 +753,9 @@ void main(List<String> args) {
         Future.delayed(Duration(seconds: 5), () => exit(1));
       }
 
-      if (Config.repl || createNewSession || sessionId != null) {
-        await startRepl(createNew: createNewSession, sessionId: sessionId);
+      if (Config.repl || forceRepl) {
+        bool createNew = !continueSession && sessionId == null;
+        await startRepl(createNew: createNew, sessionId: sessionId);
         return;
       }
 
