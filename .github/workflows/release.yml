@@ -18,6 +18,8 @@ jobs:
           submodules: true
       - name: Setup Dart
         uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.12.1
 
       - name: Compile
         run: |
@@ -40,6 +42,8 @@ jobs:
             submodules: true
         - name: Setup Dart
           uses: dart-lang/setup-dart@v1
+          with:
+            sdk: 3.12.1
   
         - name: Compile
           run: |
@@ -64,7 +68,7 @@ jobs:
           run: |
             sudo apt update
             sudo apt install aria2 unzip -y
-            aria2c https://storage.googleapis.com/dart-archive/channels/beta/release/3.7.0-209.1.beta/sdk/dartsdk-linux-arm64-release.zip
+            aria2c https://storage.googleapis.com/dart-archive/channels/stable/release/3.12.1/sdk/dartsdk-linux-arm64-release.zip
             unzip dartsdk-linux-arm64-release.zip
             rm dartsdk-linux-arm64-release.zip
 
@@ -96,7 +100,7 @@ jobs:
           run: |
             sudo apt update
             sudo apt install aria2 unzip -y
-            aria2c https://storage.googleapis.com/dart-archive/channels/beta/release/3.7.0-209.1.beta/sdk/dartsdk-linux-arm-release.zip
+            aria2c https://storage.googleapis.com/dart-archive/channels/stable/release/3.12.1/sdk/dartsdk-linux-arm-release.zip
             unzip dartsdk-linux-arm-release.zip
             rm dartsdk-linux-arm-release.zip
 
@@ -127,6 +131,8 @@ jobs:
             submodules: true
         - name: Setup Dart
           uses: dart-lang/setup-dart@v1
+          with:
+            sdk: 3.12.1
 
         - name: Compile
           run: |
@@ -150,6 +156,8 @@ jobs:
             submodules: true
         - name: Setup Dart
           uses: dart-lang/setup-dart@v1
+          with:
+            sdk: 3.12.1
 
         - name: Compile
           run: |
