@@ -24,4 +24,6 @@ sessions/
 .nwagent/
 
 .antigravitycli/
+.claude/
 test_input.dart
+demo/
