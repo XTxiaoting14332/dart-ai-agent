@@ -41,10 +41,8 @@ class HttpApi {
       // 初始化 agents
       final agents = Agents();
 
-      // 加载已有会话（如果存在）
-      if (await sessionFile.exists()) {
-        agents.loadSession(sessionFile);
-      }
+      // 设置会话文件路径并尝试加载已有会话
+      agents.loadSession(sessionFile);
 
       // 收集 agent 回复和步骤
       final responseBuffer = StringBuffer();
